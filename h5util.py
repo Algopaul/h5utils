@@ -82,6 +82,8 @@ def main():
   parser.add_argument('--output_files', type=str, nargs='+')
   parser.add_argument('--datafields', type=str, nargs='+')
   parser.add_argument('--out_shape', type=int, nargs='+')
+  parser.add_argument('--chunk_limit', type=int)
+  parser.add_argument('--idcs', type=int, nargs='+')
   args = parser.parse_args()
   if args.function == 'collect_virtual_dataset':
     collect_virtual_dataset(args.output_files[0], args.input_files, args.datafields[0], args.datafields[1])
@@ -94,7 +96,7 @@ def main():
   elif args.function == 'transpose':
     transpose(args.input_files, args.output_files)
   elif args.function == 'separate':
-    separate(args.input_files[0], args.output_files, args.datafields)
+    separate(args.input_files[0], args.output_files, args.datafields, args.chunk_limit)
   else:
     raise ValueError('Function not found')
 
