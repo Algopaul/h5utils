@@ -1,4 +1,4 @@
-# collect chunks into virtual
+"""Basic utility functions for working with h5 files"""
 import h5py
 import numpy as np
 import logging
