@@ -75,6 +75,16 @@ def separate(input_file, output_files, datafields, chunk_limit=-1):
         g.create_dataset('data', data=A)
 
 
+def matrix_collection(input_files, output_files, datafields, idcs, out_shape, i_start, slice):
+  for input_file, output_file, datafield in zip(input_files, output_files, datafields):
+    for idx in idcs:
+      data_point = np.array(h5py.File(input_file, 'r')[datafield][i_start:np.prod(out_shape)+i_start, idx])
+      data_point = np.reshape(data_point, out_shape)
+      if len(out_shape) == 3:
+        data_point = data_point[:, :, slice]
+      np.savetxt(f'{output_file}-{idx}.txt', data_point)
+
+
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('function', type=str, help='Function to run')
@@ -84,6 +94,8 @@ def main():
   parser.add_argument('--out_shape', type=int, nargs='+')
   parser.add_argument('--chunk_limit', type=int)
   parser.add_argument('--idcs', type=int, nargs='+')
+  parser.add_argument('--i_start', type=int, default=0)
+  parser.add_argument('--slice', type=int, default=0)
   args = parser.parse_args()
   if args.function == 'collect_virtual_dataset':
     collect_virtual_dataset(args.output_files[0], args.input_files, args.datafields[0], args.datafields[1])
@@ -97,6 +109,8 @@ def main():
     transpose(args.input_files, args.output_files)
   elif args.function == 'separate':
     separate(args.input_files[0], args.output_files, args.datafields, args.chunk_limit)
+  elif args.function == 'matrix_collection':
+    matrix_collection(args.input_files, args.output_files, args.datafields, args.idcs, args.out_shape, args.i_start, args.slice)
   else:
     raise ValueError('Function not found')
 
