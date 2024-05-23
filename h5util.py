@@ -86,7 +86,7 @@ def matrix_collection(input_files, output_files, data_fields, idcs, out_shape, i
 
 
 def extract_field(input_file, output_file, datafield):
-  with h5py.open(input_file, 'r') as f:
+  with h5py.File(input_file, 'r') as f:
     A = np.array(f[datafield])
     np.save(output_file, A)
   pass
