@@ -44,14 +44,14 @@ def convert_npy_to_h5(input_file, output_file, out_shape=None):
     f.create_dataset('data', data=np.reshape(data, out_shape))
 
 
-def collect_and_reshape(input_file, output_file, datafields, out_shape):
+def collect_and_reshape(input_file, output_file, data_fields, out_shape):
   """
-  Collects datafields from input_file, vstacks, and then reshapes them to out_shape
+  Collects data_fields from input_file, vstacks, and then reshapes them to out_shape
   The result is saved in output_file
   """
   with h5py.File(input_file, 'r') as f:
     d = []
-    for datafield in datafields:
+    for datafield in data_fields:
       print('datafield shape %s', f[datafield].shape)
       d.append(np.reshape(np.array(f[datafield]), out_shape))
     A = np.vstack(d)
@@ -67,16 +67,16 @@ def transpose(input_files, output_files, input_dataset_name='data', output_datas
       f.create_dataset(output_dataset_name, data=A.T)
 
 
-def separate(input_file, output_files, datafields, chunk_limit=-1):
+def separate(input_file, output_files, data_fields, chunk_limit=-1):
   with h5py.File(input_file, 'r') as f:
-    for output_file, datafield in zip(output_files, datafields):
+    for output_file, datafield in zip(output_files, data_fields):
       A = np.array(f[datafield][:, :chunk_limit])
       with h5py.File(output_file, 'w') as g:
         g.create_dataset('data', data=A)
 
 
-def matrix_collection(input_files, output_files, datafields, idcs, out_shape, i_start, slice):
-  for input_file, output_file, datafield in zip(input_files, output_files, datafields):
+def matrix_collection(input_files, output_files, data_fields, idcs, out_shape, i_start, slice):
+  for input_file, output_file, datafield in zip(input_files, output_files, data_fields):
     for idx in idcs:
       data_point = np.array(h5py.File(input_file, 'r')[datafield][i_start:np.prod(out_shape)+i_start, idx])
       data_point = np.reshape(data_point, out_shape)
@@ -97,7 +97,7 @@ def main():
   parser.add_argument('function', type=str, help='Function to run')
   parser.add_argument('--input_files', type=str, nargs='+')
   parser.add_argument('--output_files', type=str, nargs='+')
-  parser.add_argument('--datafields', type=str, nargs='+')
+  parser.add_argument('--data_fields', type=str, nargs='+')
   parser.add_argument('--out_shape', type=int, nargs='+')
   parser.add_argument('--chunk_limit', type=int)
   parser.add_argument('--idcs', type=int, nargs='+')
@@ -105,21 +105,21 @@ def main():
   parser.add_argument('--slice', type=int, default=0)
   args = parser.parse_args()
   if args.function == 'collect_virtual_dataset':
-    collect_virtual_dataset(args.output_files[0], args.input_files, args.datafields[0], args.datafields[1])
+    collect_virtual_dataset(args.output_files[0], args.input_files, args.data_fields[0], args.data_fields[1])
   elif args.function == 'convert_npy_to_h5':
     for input_file, output_file in zip(args.input_files, args.output_files):
       convert_npy_to_h5(input_file, output_file)
   elif args.function == 'collect_and_reshape':
     for input_file, output_file in zip(args.input_files, args.output_files):
-      collect_and_reshape(input_file, output_file, args.datafields, args.out_shape)
+      collect_and_reshape(input_file, output_file, args.data_fields, args.out_shape)
   elif args.function == 'transpose':
     transpose(args.input_files, args.output_files)
   elif args.function == 'separate':
-    separate(args.input_files[0], args.output_files, args.datafields, args.chunk_limit)
+    separate(args.input_files[0], args.output_files, args.data_fields, args.chunk_limit)
   elif args.function == 'matrix_collection':
-    matrix_collection(args.input_files, args.output_files, args.datafields, args.idcs, args.out_shape, args.i_start, args.slice)
+    matrix_collection(args.input_files, args.output_files, args.data_fields, args.idcs, args.out_shape, args.i_start, args.slice)
   elif args.function == 'extract_field':
-    extract_field(args.input_files[0], args.output_file[0], args.datafields[0])
+    extract_field(args.input_files[0], args.output_files[0], args.data_fields[0])
   else:
     raise ValueError('Function not found')
 
