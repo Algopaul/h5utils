@@ -85,6 +85,13 @@ def matrix_collection(input_files, output_files, datafields, idcs, out_shape, i_
       np.savetxt(f'{output_file}-{idx}.txt', data_point)
 
 
+def extract_field(input_file, output_file, datafield):
+  with h5py.open(input_file, 'r') as f:
+    A = np.array(f[datafield])
+    np.save(output_file, A)
+  pass
+
+
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('function', type=str, help='Function to run')
@@ -111,6 +118,8 @@ def main():
     separate(args.input_files[0], args.output_files, args.datafields, args.chunk_limit)
   elif args.function == 'matrix_collection':
     matrix_collection(args.input_files, args.output_files, args.datafields, args.idcs, args.out_shape, args.i_start, args.slice)
+  elif args.function == 'extract_field':
+    extract_field(args.input_files[0], args.output_file[0], args.datafields[0])
   else:
     raise ValueError('Function not found')
 
